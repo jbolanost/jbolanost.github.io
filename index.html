@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mis siete votos · Siete pilares de vida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="votos.css">
+</head>
+<body>
+
+<nav class="dots" aria-label="Ir a un voto" id="dots"></nav>
+
+<header class="hero">
+  <div class="hero-text">
+    <p class="kicker">Mi compromiso personal</p>
+    <h1>Mis siete votos</h1>
+    <p class="sub">Siete pilares de vida</p>
+    <p class="lead">Cada voto es una promesa y cada acción, un paso concreto para cumplirla. Marca lo que vas logrando y mira crecer tu progreso.</p>
+  </div>
+  <div class="total" aria-live="polite">
+    <div class="ring" id="ring"><span id="pct">0%</span></div>
+    <p id="count">0 de 21 acciones</p>
+    <button type="button" id="reset">Reiniciar progreso</button>
+  </div>
+  <img class="strip" src="img/votos.jpg" alt="Siete estandartes ilustrados: honestidad, generosidad, trabajo duro, humildad, planificación efectiva, sentido común y dominio propio">
+</header>
+
+<main id="votos"></main>
+
+<footer>
+  <p id="msg">Un voto se cumple día a día.</p>
+</footer>
+
+<script>
+(function () {
+  var ORD = ['primer', 'segundo', 'tercer', 'cuarto', 'quinto', 'sexto', 'séptimo'];
+  var V = [
+    { p: 'Honestidad', pil: 'Pilar de la honestidad', c: 'Me comprometo a decir la verdad con tacto y a admitir mis errores de inmediato sin buscar excusas.',
+      a: ['Decir siempre la verdad, incluso cuando reconocer un error pueda traer consecuencias.', 'Cumplir las promesas y compromisos que haga con otras personas.', 'Evitar aprovecharme de los demás y actuar con justicia en mis decisiones.'] },
+    { p: 'Generosidad', pil: 'Pilar de la generosidad', c: 'Me comprometo a dedicar tiempo y atención genuina para ayudar a alguien cada día, sin esperar nada a cambio.',
+      a: ['Compartir algo de mi tiempo para ayudar a alguien que lo necesite.', 'Escuchar con atención a las personas cuando necesiten hablar o desahogarse.', 'Realizar diariamente un acto de bondad sin esperar nada a cambio.'] },
+    { p: 'Trabajo duro', pil: 'Pilar del trabajo duro', c: 'Me comprometo a dar mi máximo esfuerzo en mis tareas diarias, terminando lo que empiezo antes de distraerme.',
+      a: ['Terminar mis tareas y responsabilidades antes de dedicarme a actividades recreativas.', 'Dedicar al menos 30 minutos diarios a mejorar una habilidad personal o académica.', 'Realizar mis actividades con esfuerzo y dedicación, incluso cuando sean pequeñas o poco atractivas.'] },
+    { p: 'Humildad', pil: 'Pilar de la humildad', c: 'Me comprometo a escuchar activamente las opiniones de los demás y a aceptar críticas constructivas sin ponerme a la defensiva.',
+      a: ['Reconocer mis errores y aceptar las críticas constructivas sin poner excusas.', 'Escuchar las opiniones de los demás sin creer que siempre tengo la razón.', 'Agradecer diariamente por las oportunidades y ayudas que recibo.'] },
+    { p: 'Planificación efectiva', pil: 'Pilar de la planificación efectiva', c: 'Me comprometo a definir y escribir mis tres prioridades principales la noche anterior para ejecutarlas con enfoque al día siguiente.',
+      a: ['Escribir cada mañana las tres tareas más importantes que debo completar durante el día.', 'Organizar mis actividades académicas y personales utilizando un calendario.', 'Evitar actuar impulsivamente y pensar antes de comprometerme con nuevas actividades.'] },
+    { p: 'Sentido común', pil: 'Pilar del sentido común', c: 'Me comprometo a evaluar los riesgos y consecuencias prácticas antes de tomar cualquier decisión importante o apresurada.',
+      a: ['Pensar en las posibles consecuencias antes de tomar una decisión importante.', 'Escuchar atentamente antes de responder durante una conversación o discusión.', 'Dedicar unos minutos a analizar un problema antes de buscar una solución.'] },
+    { p: 'Dominio propio', pil: 'Pilar del dominio propio', c: 'Me comprometo a hacer una pausa de diez segundos antes de reaccionar ante una provocación, un impulso o una frustración.',
+      a: ['Esperar unos minutos antes de responder cuando algo me haga enojar.', 'Establecer límites al tiempo que dedico a las redes sociales, videojuegos y entretenimiento.', 'Evitar actuar por impulso y mantener mis compromisos incluso cuando no tenga ganas de cumplirlos.'] }
+  ];
+  var KEY = 'siete-votos-progreso', S = {};
+  try { S = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { S = {}; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+  var main = document.getElementById('votos'), dots = document.getElementById('dots');
+  main.innerHTML = V.map(function (v, i) {
+    var n = i + 1;
+    return '<article class="vote v' + n + '" id="voto-' + n + '">' +
+      '<img src="img/voto' + n + '.jpg" alt="Ilustración del pilar: ' + v.p.toLowerCase() + '" loading="lazy">' +
+      '<div class="body"><header><p class="ord">El ' + ORD[i] + ' voto</p><h2>' + v.p + '</h2><p class="pil">' + v.pil + '</p></header>' +
+      '<blockquote>' + v.c + '</blockquote><h3>Mis acciones</h3><ul class="acts">' +
+      v.a.map(function (t, j) {
+        return '<li><label><input type="checkbox" data-k="' + i + '-' + j + '"><span>' + t + '</span></label></li>';
+      }).join('') +
+      '</ul><div class="meter"><div class="bar"><i></i></div><span class="cnt"></span></div></div></article>';
+  }).join('');
+  dots.innerHTML = V.map(function (v, i) {
+    return '<a class="v' + (i + 1) + '" href="#voto-' + (i + 1) + '" title="' + v.p + '">' + (i + 1) + '</a>';
+  }).join('');
+
+  function update() {
+    var total = 0;
+    V.forEach(function (v, i) {
+      var done = 0;
+      v.a.forEach(function (t, j) {
+        var box = main.querySelector('[data-k="' + i + '-' + j + '"]');
+        box.checked = !!S[i + '-' + j];
+        if (box.checked) done++;
+      });
+      total += done;
+      var card = document.getElementById('voto-' + (i + 1));
+      card.classList.toggle('done', done === v.a.length);
+      card.querySelector('.bar i').style.width = (done / v.a.length * 100) + '%';
+      card.querySelector('.cnt').textContent = done === v.a.length ? '¡Voto cumplido!' : done + ' de ' + v.a.length;
+      dots.children[i].classList.toggle('done', done === v.a.length);
+    });
+    var pct = Math.round(total / 21 * 100);
+    document.getElementById('ring').style.setProperty('--p', pct);
+    document.getElementById('pct').textContent = pct + '%';
+    document.getElementById('count').textContent = total + ' de 21 acciones';
+    document.getElementById('msg').textContent = total === 21
+      ? '¡Has cumplido tus siete votos! Mantén el hábito cada día.'
+      : 'Un voto se cumple día a día.';
+  }
+
+  main.addEventListener('change', function (e) {
+    var k = e.target.getAttribute('data-k');
+    if (!k) return;
+    if (e.target.checked) S[k] = 1; else delete S[k];
+    save(); update();
+  });
+  document.getElementById('reset').addEventListener('click', function () {
+    if (confirm('¿Borrar todo tu progreso y empezar de nuevo?')) { S = {}; save(); update(); }
+  });
+  update();
+})();
+</script>
+</body>
+</html>
